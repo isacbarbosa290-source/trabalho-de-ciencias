@@ -1,0 +1,4287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Jornada da Reprodução Humana</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#070b14;
+    --bg2:#0b1120;
+    --panel:#101827;
+    --panel2:#151f32;
+    --panel3:#1b2940;
+    --text:#f4f7ff;
+    --muted:#8997ae;
+
+    --purple:#8b5cf6;
+    --blue:#38bdf8;
+    --cyan:#22d3ee;
+    --green:#34d399;
+    --yellow:#facc15;
+    --red:#fb7185;
+    --pink:#f472b6;
+
+    --border:rgba(255,255,255,.08);
+    --shadow:0 25px 80px rgba(0,0,0,.35);
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
+}
+
+body{
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(139,92,246,.14),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(34,211,238,.09),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color:var(--text);
+    font-family:
+        Inter,
+        Segoe UI,
+        Arial,
+        sans-serif;
+}
+
+button{
+    font-family:inherit;
+}
+
+button:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:3px;
+}
+
+/* =====================================================
+   LAYOUT
+===================================================== */
+
+#app{
+    min-height:100vh;
+}
+
+.game-layout{
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:260px 1fr;
+}
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:260px;
+    padding:22px 16px;
+    background:rgba(9,14,25,.93);
+    border-right:1px solid var(--border);
+    backdrop-filter:blur(20px);
+    z-index:100;
+
+    display:flex;
+    flex-direction:column;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:4px 8px 22px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo-icon{
+    width:43px;
+    height:43px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    font-size:23px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            var(--blue)
+        );
+
+    box-shadow:
+        0 10px 30px
+        rgba(139,92,246,.25);
+}
+
+.logo-text strong{
+    display:block;
+    font-size:14px;
+}
+
+.logo-text span{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.sidebar-title{
+    margin:24px 8px 10px;
+    color:#61708a;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.phase-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.phase-item{
+    position:relative;
+    width:100%;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--muted);
+    padding:11px 10px;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-align:left;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.phase-item:hover:not(:disabled){
+    background:rgba(255,255,255,.035);
+    color:white;
+}
+
+.phase-item.active{
+    background:
+        linear-gradient(
+            90deg,
+            rgba(139,92,246,.17),
+            transparent
+        );
+
+    border-color:
+        rgba(139,92,246,.25);
+
+    color:white;
+}
+
+.phase-item.completed{
+    color:#a7f3d0;
+}
+
+.phase-item.locked{
+    opacity:.42;
+    cursor:not-allowed;
+}
+
+.phase-icon{
+    width:31px;
+    height:31px;
+    border-radius:9px;
+    background:#182238;
+
+    display:grid;
+    place-items:center;
+
+    font-size:15px;
+}
+
+.phase-item.active .phase-icon{
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            #5965ff
+        );
+}
+
+.phase-item.completed .phase-icon{
+    background:
+        rgba(52,211,153,.15);
+    color:var(--green);
+}
+
+.phase-name{
+    font-size:12px;
+    font-weight:700;
+}
+
+.phase-check{
+    margin-left:auto;
+    font-size:11px;
+}
+
+.sidebar-bottom{
+    margin-top:auto;
+}
+
+.sidebar-card{
+    padding:15px;
+    border-radius:16px;
+    background:
+        linear-gradient(
+            145deg,
+            #121c30,
+            #0d1422
+        );
+    border:1px solid var(--border);
+}
+
+.sidebar-card-title{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:7px;
+}
+
+.side-score{
+    font-size:22px;
+    font-weight:900;
+    color:var(--yellow);
+}
+
+.side-progress{
+    margin-top:12px;
+}
+
+.side-progress-bar{
+    height:6px;
+    background:#202b40;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.side-progress-fill{
+    height:100%;
+    width:0%;
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan)
+        );
+    transition:.5s;
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+    grid-column:2;
+    min-width:0;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+
+    height:72px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    background:
+        rgba(7,11,20,.82);
+
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.mobile-menu{
+    display:none;
+}
+
+.top-title{
+    font-size:14px;
+    font-weight:800;
+}
+
+.top-subtitle{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:3px;
+}
+
+.top-stats{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.stat{
+    padding:9px 13px;
+    background:#101827;
+    border:1px solid var(--border);
+    border-radius:11px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.stat.score{
+    color:var(--yellow);
+}
+
+.stat.lives{
+    color:#ff9cac;
+}
+
+.content{
+    width:min(1050px,100%);
+    margin:auto;
+    padding:38px 30px 80px;
+}
+
+/* =====================================================
+   SCREENS
+===================================================== */
+
+.screen{
+    display:none;
+}
+
+.screen.active{
+    display:block;
+    animation:fadeIn .4s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+
+.home{
+    min-height:calc(100vh - 72px);
+    display:flex;
+    align-items:center;
+}
+
+.home-grid{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:50px;
+    align-items:center;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+
+    padding:7px 11px;
+    border-radius:30px;
+
+    background:
+        rgba(139,92,246,.1);
+
+    border:
+        1px solid rgba(139,92,246,.2);
+
+    color:#c4b5fd;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.home h1{
+    margin-top:18px;
+    font-size:clamp(40px,6vw,70px);
+    line-height:.98;
+    letter-spacing:-2px;
+}
+
+.gradient-text{
+    background:
+        linear-gradient(
+            90deg,
+            #fff,
+            #c4b5fd,
+            #67e8f9
+        );
+
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.home-description{
+    margin-top:22px;
+    max-width:620px;
+    color:var(--muted);
+    line-height:1.8;
+    font-size:16px;
+}
+
+.home-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:30px;
+}
+
+.btn{
+    border:0;
+    cursor:pointer;
+    padding:13px 19px;
+    border-radius:12px;
+    color:white;
+    font-size:13px;
+    font-weight:900;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+}
+
+.btn-primary{
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            #5865ff
+        );
+
+    box-shadow:
+        0 12px 35px
+        rgba(139,92,246,.2);
+}
+
+.btn-secondary{
+    background:#131d30;
+    border:1px solid var(--border);
+}
+
+.btn-success{
+    background:
+        linear-gradient(
+            135deg,
+            #16a879,
+            var(--green)
+        );
+}
+
+.btn:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+    transform:none;
+}
+
+/* DNA ORB */
+
+.dna-orb{
+    width:330px;
+    height:330px;
+    margin:auto;
+
+    position:relative;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(139,92,246,.16),
+            rgba(34,211,238,.04) 45%,
+            transparent 70%
+        );
+
+    border:
+        1px solid
+        rgba(139,92,246,.18);
+
+    display:grid;
+    place-items:center;
+
+    box-shadow:
+        0 0 80px
+        rgba(139,92,246,.1);
+}
+
+.dna-big{
+    font-size:105px;
+
+    animation:
+        float 3s ease-in-out infinite;
+}
+
+.orb-ring{
+    position:absolute;
+    inset:22px;
+    border-radius:50%;
+    border:1px dashed rgba(103,232,249,.2);
+    animation:spin 15s linear infinite;
+}
+
+.orb-ring.two{
+    inset:50px;
+    animation-duration:10s;
+    animation-direction:reverse;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes float{
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-10px);
+    }
+}
+
+/* =====================================================
+   SECTION HEADER
+===================================================== */
+
+.section-header{
+    margin-bottom:24px;
+}
+
+.section-tag{
+    color:var(--cyan);
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.section-header h2{
+    font-size:32px;
+    margin-top:7px;
+}
+
+.section-header p{
+    color:var(--muted);
+    line-height:1.6;
+    margin-top:7px;
+}
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.card{
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,24,39,.96),
+            rgba(11,17,31,.96)
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:18px;
+}
+
+.card-title{
+    font-size:19px;
+    margin-bottom:8px;
+}
+
+.card-description{
+    color:var(--muted);
+    line-height:1.6;
+    font-size:13px;
+}
+
+/* =====================================================
+   MAP
+===================================================== */
+
+.map-card{
+    padding:20px;
+}
+
+.map-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.map-node{
+    min-height:145px;
+    padding:17px;
+
+    border-radius:17px;
+
+    background:#0e1728;
+    border:1px solid var(--border);
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.map-node:hover:not(.locked){
+    transform:translateY(-3px);
+    border-color:rgba(139,92,246,.45);
+}
+
+.map-node.current{
+    border-color:var(--purple);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(139,92,246,.15),
+            #0e1728
+        );
+}
+
+.map-node.done{
+    border-color:rgba(52,211,153,.3);
+}
+
+.map-node.locked{
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+.map-icon{
+    font-size:30px;
+}
+
+.map-node strong{
+    display:block;
+    margin-top:13px;
+    font-size:13px;
+}
+
+.map-node span{
+    display:block;
+    margin-top:5px;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.4;
+}
+
+/* =====================================================
+   QUESTION
+===================================================== */
+
+.question-title{
+    font-size:21px;
+    line-height:1.4;
+    margin-bottom:18px;
+}
+
+.answers{
+    display:grid;
+    gap:9px;
+}
+
+.answer{
+    width:100%;
+    text-align:left;
+
+    border:1px solid var(--border);
+    background:#111b2c;
+    color:#eef4ff;
+
+    border-radius:13px;
+
+    padding:14px;
+
+    cursor:pointer;
+
+    transition:.18s;
+
+    font-size:13px;
+}
+
+.answer:hover:not(:disabled){
+    background:#18243a;
+    border-color:rgba(139,92,246,.5);
+    transform:translateX(2px);
+}
+
+.answer.correct{
+    background:rgba(52,211,153,.1);
+    border-color:var(--green);
+    color:#a7f3d0;
+}
+
+.answer.wrong{
+    background:rgba(251,113,133,.1);
+    border-color:var(--red);
+    color:#fecdd3;
+}
+
+.answer:disabled{
+    cursor:default;
+}
+
+.feedback{
+    display:none;
+    margin-top:15px;
+    padding:14px;
+    border-radius:12px;
+    line-height:1.55;
+    font-size:13px;
+}
+
+.feedback.show{
+    display:block;
+}
+
+.feedback.good{
+    color:#a7f3d0;
+    background:rgba(52,211,153,.08);
+    border:1px solid rgba(52,211,153,.2);
+}
+
+.feedback.bad{
+    color:#fecdd3;
+    background:rgba(251,113,133,.08);
+    border:1px solid rgba(251,113,133,.2);
+}
+
+.next{
+    margin-top:18px;
+    display:flex;
+    justify-content:flex-end;
+}
+
+/* =====================================================
+   INFO GRID
+===================================================== */
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:13px;
+}
+
+.info-box{
+    padding:18px;
+    border-radius:15px;
+    background:#0e1728;
+    border:1px solid var(--border);
+}
+
+.info-icon{
+    font-size:27px;
+}
+
+.info-box strong{
+    display:block;
+    margin-top:10px;
+    font-size:14px;
+}
+
+.info-box p{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.55;
+    margin-top:6px;
+}
+
+/* =====================================================
+   DIAGRAMA
+===================================================== */
+
+.diagram{
+    min-height:390px;
+
+    border-radius:18px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(139,92,246,.08),
+            transparent 65%
+        ),
+        #0b1423;
+
+    border:1px solid var(--border);
+
+    display:grid;
+    place-items:center;
+
+    margin-bottom:18px;
+}
+
+.diagram svg{
+    width:min(500px,100%);
+    height:auto;
+}
+
+.svg-click{
+    cursor:pointer;
+    transition:.2s;
+}
+
+.svg-click:hover{
+    filter:brightness(1.4);
+}
+
+.svg-click.selected{
+    filter:
+        drop-shadow(
+            0 0 9px
+            rgba(34,211,238,.8)
+        );
+}
+
+/* =====================================================
+   MATCH / CARDS
+===================================================== */
+
+.match-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:13px;
+}
+
+.match-card{
+    min-height:120px;
+    padding:18px;
+
+    border-radius:16px;
+
+    background:#0e1728;
+    border:1px solid var(--border);
+
+    cursor:pointer;
+    transition:.2s;
+}
+
+.match-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(139,92,246,.5);
+}
+
+.match-card.selected{
+    border-color:var(--cyan);
+    background:rgba(34,211,238,.06);
+}
+
+.match-card.matched{
+    border-color:var(--green);
+    background:rgba(52,211,153,.06);
+    cursor:default;
+}
+
+.match-card .icon{
+    font-size:27px;
+}
+
+.match-card strong{
+    display:block;
+    margin-top:8px;
+    font-size:14px;
+}
+
+.match-card p{
+    margin-top:5px;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.4;
+}
+
+/* =====================================================
+   ORDER
+===================================================== */
+
+.order-list{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.order-btn{
+    min-height:125px;
+
+    position:relative;
+
+    text-align:left;
+
+    border:1px solid var(--border);
+    background:#0e1728;
+    color:white;
+
+    border-radius:16px;
+
+    padding:19px;
+
+    cursor:pointer;
+    transition:.2s;
+}
+
+.order-btn:hover:not(:disabled){
+    transform:translateY(-3px);
+    border-color:var(--purple);
+}
+
+.order-btn.done{
+    border-color:var(--green);
+    background:rgba(52,211,153,.06);
+}
+
+.order-btn:disabled{
+    cursor:default;
+}
+
+.order-num{
+    position:absolute;
+    right:14px;
+    top:14px;
+
+    width:30px;
+    height:30px;
+
+    border-radius:50%;
+
+    display:grid;
+    place-items:center;
+
+    background:#1b2940;
+    color:var(--muted);
+
+    font-weight:900;
+}
+
+.order-btn.done .order-num{
+    background:var(--green);
+    color:#06140e;
+}
+
+.order-btn strong{
+    display:block;
+    padding-right:40px;
+    font-size:14px;
+}
+
+.order-btn p{
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.5;
+    margin-top:8px;
+}
+
+/* =====================================================
+   PROGRESS
+===================================================== */
+
+.big-progress{
+    display:flex;
+    gap:7px;
+    margin-bottom:22px;
+}
+
+.big-progress span{
+    height:5px;
+    flex:1;
+    background:#1c2940;
+    border-radius:20px;
+    transition:.3s;
+}
+
+.big-progress span.active{
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan)
+        );
+}
+
+/* =====================================================
+   FINAL
+===================================================== */
+
+.final{
+    min-height:calc(100vh - 72px);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+}
+
+.final-box{
+    width:min(760px,100%);
+}
+
+.trophy{
+    font-size:85px;
+    animation:float 3s ease-in-out infinite;
+}
+
+.final h2{
+    font-size:48px;
+    margin-top:12px;
+}
+
+.final p{
+    color:var(--muted);
+    line-height:1.7;
+    margin-top:10px;
+}
+
+.final-score{
+    display:inline-block;
+    margin:22px 0;
+    padding:15px 25px;
+
+    border-radius:15px;
+
+    background:rgba(250,204,21,.08);
+    border:1px solid rgba(250,204,21,.2);
+
+    color:var(--yellow);
+    font-size:26px;
+    font-weight:900;
+}
+
+.summary{
+    text-align:left;
+
+    padding:23px;
+
+    background:#101827;
+    border:1px solid var(--border);
+
+    border-radius:18px;
+}
+
+.summary h3{
+    margin-bottom:14px;
+}
+
+.summary li{
+    margin:10px 0;
+    color:#bdc8da;
+    line-height:1.5;
+    font-size:13px;
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+
+    transform:
+        translate(-50%,25px);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    z-index:500;
+
+    padding:13px 18px;
+
+    border-radius:13px;
+
+    background:#1c2940;
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    transition:.3s;
+
+    font-size:13px;
+    font-weight:700;
+
+    max-width:90%;
+    text-align:center;
+}
+
+.toast.show{
+    opacity:1;
+    transform:
+        translate(-50%,0);
+}
+
+.toast.good{
+    border-color:rgba(52,211,153,.4);
+}
+
+.toast.bad{
+    border-color:rgba(251,113,133,.4);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:950px){
+
+    .game-layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+        box-shadow:20px 0 50px rgba(0,0,0,.4);
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        grid-column:1;
+    }
+
+    .mobile-menu{
+        display:grid;
+        place-items:center;
+
+        width:38px;
+        height:38px;
+
+        border:1px solid var(--border);
+        background:#111a2b;
+        color:white;
+
+        border-radius:10px;
+        cursor:pointer;
+    }
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .home-grid{
+        grid-template-columns:1fr;
+    }
+
+    .dna-orb{
+        width:250px;
+        height:250px;
+    }
+
+    .map-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:25px 14px 60px;
+    }
+
+    .top-title{
+        display:none;
+    }
+
+    .stat{
+        padding:8px 9px;
+        font-size:11px;
+    }
+
+    .home{
+        min-height:calc(100vh - 72px);
+    }
+
+    .home h1{
+        font-size:42px;
+    }
+
+    .home-buttons{
+        flex-direction:column;
+    }
+
+    .home-buttons .btn{
+        width:100%;
+    }
+
+    .info-grid,
+    .match-grid,
+    .order-list{
+        grid-template-columns:1fr;
+    }
+
+    .map-grid{
+        grid-template-columns:1fr;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .section-header h2{
+        font-size:27px;
+    }
+
+    .final h2{
+        font-size:35px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<div class="game-layout">
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-icon">🧬</div>
+
+        <div class="logo-text">
+            <strong>Jornada da</strong>
+            <span>Reprodução Humana</span>
+        </div>
+
+    </div>
+
+    <div class="sidebar-title">
+        Jornada
+    </div>
+
+    <div class="phase-list">
+
+        <button class="phase-item active" data-phase="1">
+            <div class="phase-icon">🔬</div>
+            <div class="phase-name">Sistema feminino</div>
+            <div class="phase-check">1</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="2">
+            <div class="phase-icon">🔬</div>
+            <div class="phase-name">Sistema masculino</div>
+            <div class="phase-check">2</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="3">
+            <div class="phase-icon">🧪</div>
+            <div class="phase-name">Gametas</div>
+            <div class="phase-check">3</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="4">
+            <div class="phase-icon">✨</div>
+            <div class="phase-name">Fecundação</div>
+            <div class="phase-check">4</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="5">
+            <div class="phase-icon">🧩</div>
+            <div class="phase-name">Desenvolvimento</div>
+            <div class="phase-check">5</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="6">
+            <div class="phase-icon">🫀</div>
+            <div class="phase-name">Gestação</div>
+            <div class="phase-check">6</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="7">
+            <div class="phase-icon">🧬</div>
+            <div class="phase-name">Cromossomos</div>
+            <div class="phase-check">7</div>
+        </button>
+
+        <button class="phase-item locked" data-phase="8">
+            <div class="phase-icon">🏆</div>
+            <div class="phase-name">Desafio final</div>
+            <div class="phase-check">8</div>
+        </button>
+
+    </div>
+
+    <div class="sidebar-bottom">
+
+        <div class="sidebar-card">
+
+            <div class="sidebar-card-title">
+                Sua pontuação
+            </div>
+
+            <div class="side-score">
+                ⭐ <span id="sideScore">0</span>
+            </div>
+
+            <div class="side-progress">
+
+                <div class="side-progress-bar">
+                    <div
+                        class="side-progress-fill"
+                        id="sideProgress"
+                    ></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <button
+        class="mobile-menu"
+        id="mobileMenu"
+    >
+        ☰
+    </button>
+
+    <div>
+
+        <div class="top-title" id="topTitle">
+            Jornada da Reprodução Humana
+        </div>
+
+        <div class="top-subtitle">
+            Ciências • Aprenda jogando
+        </div>
+
+    </div>
+
+    <div class="top-stats">
+
+        <div class="stat lives">
+            ❤️ <span id="lives">3</span>
+        </div>
+
+        <div class="stat score">
+            ⭐ <span id="topScore">0</span>
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="content">
+
+
+<!-- =====================================================
+     HOME
+===================================================== -->
+
+<section
+    class="screen active"
+    id="screen-home"
+>
+
+<div class="home">
+
+<div class="home-grid">
+
+<div>
+
+    <div class="badge">
+        🧪 MISSÃO DE CIÊNCIAS
+    </div>
+
+    <h1>
+        Jornada da
+        <span class="gradient-text">
+            Reprodução Humana
+        </span>
+    </h1>
+
+    <p class="home-description">
+        Explore uma jornada interativa pelos principais conceitos
+        da reprodução humana. Descubra estruturas, células,
+        fecundação, desenvolvimento, gestação e genética.
+    </p>
+
+    <div class="home-buttons">
+
+        <button
+            class="btn btn-primary"
+            id="startGame"
+        >
+            ▶ Iniciar jornada
+        </button>
+
+        <button
+            class="btn btn-secondary"
+            id="howTo"
+        >
+            📚 Como funciona?
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="dna-orb">
+
+    <div class="orb-ring"></div>
+    <div class="orb-ring two"></div>
+
+    <div class="dna-big">
+        🧬
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     MAP
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-map"
+>
+
+<div class="section-header">
+
+    <div class="section-tag">
+        MAPA DA JORNADA
+    </div>
+
+    <h2>🗺️ Sua missão</h2>
+
+    <p>
+        Complete cada etapa para desbloquear a próxima.
+    </p>
+
+</div>
+
+
+<div class="card map-card">
+
+<div class="map-grid">
+
+    <div class="map-node current" data-map="1">
+        <div class="map-icon">🔬</div>
+        <strong>01 • Sistema feminino</strong>
+        <span>Conheça algumas estruturas e suas funções.</span>
+    </div>
+
+    <div class="map-node locked" data-map="2">
+        <div class="map-icon">🔬</div>
+        <strong>02 • Sistema masculino</strong>
+        <span>Descubra órgãos relacionados à produção dos gametas.</span>
+    </div>
+
+    <div class="map-node locked" data-map="3">
+        <div class="map-icon">🧪</div>
+        <strong>03 • Gametas</strong>
+        <span>Compare óvulo e espermatozoide.</span>
+    </div>
+
+    <div class="map-node locked" data-map="4">
+        <div class="map-icon">✨</div>
+        <strong>04 • Fecundação</strong>
+        <span>Entenda a formação do zigoto.</span>
+    </div>
+
+    <div class="map-node locked" data-map="5">
+        <div class="map-icon">🧩</div>
+        <strong>05 • Desenvolvimento</strong>
+        <span>Organize as etapas iniciais.</span>
+    </div>
+
+    <div class="map-node locked" data-map="6">
+        <div class="map-icon">🫀</div>
+        <strong>06 • Gestação</strong>
+        <span>Aprenda sobre placenta e desenvolvimento.</span>
+    </div>
+
+    <div class="map-node locked" data-map="7">
+        <div class="map-icon">🧬</div>
+        <strong>07 • Cromossomos</strong>
+        <span>Revise conceitos básicos de genética.</span>
+    </div>
+
+    <div class="map-node locked" data-map="8">
+        <div class="map-icon">🏆</div>
+        <strong>08 • Desafio final</strong>
+        <span>Teste tudo que você aprendeu.</span>
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 1
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-1"
+>
+
+<div class="section-header">
+
+    <div class="section-tag">
+        FASE 01
+    </div>
+
+    <h2>🔬 Sistema reprodutor feminino</h2>
+
+    <p>
+        Clique nas estruturas para descobrir suas funções.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="diagram">
+
+<svg
+    viewBox="0 0 500 500"
+    xmlns="http://www.w3.org/2000/svg"
+>
+
+<!-- útero -->
+
+<g
+    class="svg-click"
+    data-organ="uterus"
+>
+
+<path
+    d="
+    M190 150
+    C155 135 125 160 130 205
+    C134 235 155 252 165 268
+    L165 345
+    C165 380 190 398 250 398
+    C310 398 335 380 335 345
+    L335 268
+    C345 252 366 235 370 205
+    C375 160 345 135 310 150
+    C290 160 275 175 250 175
+    C225 175 210 160 190 150
+    Z"
+    fill="#b65c92"
+    stroke="#ee9dc9"
+    stroke-width="5"
+/>
+
+<text
+    x="250"
+    y="245"
+    fill="white"
+    text-anchor="middle"
+    font-size="19"
+    font-weight="bold"
+>
+ÚTERO
+</text>
+
+</g>
+
+
+<!-- tuba esquerda -->
+
+<g
+    class="svg-click"
+    data-organ="tube"
+>
+
+<path
+    d="
+    M170 195
+    C130 160 92 145 53 165
+    C35 175 28 190 40 200
+    C52 209 68 196 82 191
+    C105 183 135 200 160 222"
+    fill="none"
+    stroke="#eab84d"
+    stroke-width="15"
+    stroke-linecap="round"
+/>
+
+</g>
+
+
+<!-- tuba direita -->
+
+<g
+    class="svg-click"
+    data-organ="tube"
+>
+
+<path
+    d="
+    M330 195
+    C370 160 408 145 447 165
+    C465 175 472 190 460 200
+    C448 209 432 196 418 191
+    C395 183 365 200 340 222"
+    fill="none"
+    stroke="#eab84d"
+    stroke-width="15"
+    stroke-linecap="round"
+/>
+
+</g>
+
+
+<!-- ovário esquerdo -->
+
+<g
+    class="svg-click"
+    data-organ="ovary"
+>
+
+<ellipse
+    cx="47"
+    cy="180"
+    rx="29"
+    ry="23"
+    fill="#805cf5"
+    stroke="#b5a2ff"
+    stroke-width="5"
+/>
+
+</g>
+
+
+<!-- ovário direito -->
+
+<g
+    class="svg-click"
+    data-organ="ovary"
+>
+
+<ellipse
+    cx="453"
+    cy="180"
+    rx="29"
+    ry="23"
+    fill="#805cf5"
+    stroke="#b5a2ff"
+    stroke-width="5"
+/>
+
+</g>
+
+
+<!-- vagina -->
+
+<g
+    class="svg-click"
+    data-organ="vagina"
+>
+
+<path
+    d="
+    M225 345
+    L225 430
+    Q250 455 275 430
+    L275 345"
+    fill="#80466f"
+    stroke="#d67caf"
+    stroke-width="5"
+/>
+
+<text
+    x="250"
+    y="480"
+    fill="#eab4d3"
+    text-anchor="middle"
+    font-size="16"
+    font-weight="bold"
+>
+VAGINA
+</text>
+
+</g>
+
+</svg>
+
+</div>
+
+
+<div
+    class="info-grid"
+    id="organInfo"
+>
+
+<div class="info-box">
+
+<div class="info-icon">👆</div>
+
+<strong>Explore o modelo</strong>
+
+<p>
+Clique em uma estrutura para visualizar uma explicação.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Qual estrutura normalmente produz os óvulos?
+</div>
+
+<div class="answers" id="q1">
+
+<button class="answer" data-correct="true">
+🟣 Ovários
+</button>
+
+<button class="answer">
+🟪 Útero
+</button>
+
+<button class="answer">
+🔵 Vagina
+</button>
+
+<button class="answer">
+🟡 Tuba uterina
+</button>
+
+</div>
+
+<div class="feedback" id="f1"></div>
+
+<div class="next">
+<button
+    class="btn btn-primary"
+    id="next1"
+    disabled
+>
+Próxima fase →
+</button>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 2
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-2"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 02
+</div>
+
+<h2>🔬 Sistema reprodutor masculino</h2>
+
+<p>
+Conheça algumas estruturas e entenda suas funções.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<div class="info-icon">🧪</div>
+
+<strong>Testículos</strong>
+
+<p>
+Produzem os espermatozoides e hormônios, como a testosterona.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">〰️</div>
+
+<strong>Epidídimo</strong>
+
+<p>
+É uma estrutura onde os espermatozoides passam por etapas de maturação.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🧬</div>
+
+<strong>Ductos</strong>
+
+<p>
+Participam do transporte dos espermatozoides pelo sistema reprodutor.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🔬</div>
+
+<strong>Espermatozoides</strong>
+
+<p>
+São os gametas masculinos envolvidos na reprodução.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Qual estrutura produz os espermatozoides?
+</div>
+
+<div class="answers" id="q2">
+
+<button class="answer">
+Útero
+</button>
+
+<button class="answer" data-correct="true">
+Testículos
+</button>
+
+<button class="answer">
+Ovários
+</button>
+
+<button class="answer">
+Placenta
+</button>
+
+</div>
+
+<div class="feedback" id="f2"></div>
+
+<div class="next">
+<button
+    class="btn btn-primary"
+    id="next2"
+    disabled
+>
+Próxima fase →
+</button>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 3
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-3"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 03
+</div>
+
+<h2>🧪 Conhecendo os gametas</h2>
+
+<p>
+Compare as duas células reprodutivas humanas.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<div class="info-icon">🟣</div>
+
+<strong>Óvulo</strong>
+
+<p>
+É o gameta feminino. É uma célula grande em comparação ao espermatozoide.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🔬</div>
+
+<strong>Espermatozoide</strong>
+
+<p>
+É o gameta masculino e possui uma estrutura especializada para se movimentar.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🧬</div>
+
+<strong>Material genético</strong>
+
+<p>
+Os gametas possuem metade do número de cromossomos das células somáticas.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">➗</div>
+
+<strong>23 cromossomos</strong>
+
+<p>
+Cada gameta humano normalmente possui 23 cromossomos.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Associe cada descrição ao conceito correto:
+</div>
+
+<div class="answers" id="q3">
+
+<button
+    class="answer"
+    data-correct="true"
+>
+🟣 Gameta feminino → óvulo
+</button>
+
+<button class="answer">
+🧬 Gameta feminino → zigoto
+</button>
+
+<button
+    class="answer"
+>
+🔬 Gameta masculino → embrião
+</button>
+
+<button class="answer">
+🧪 Gameta masculino → útero
+</button>
+
+</div>
+
+<div class="feedback" id="f3"></div>
+
+<div class="next">
+<button
+    class="btn btn-primary"
+    id="next3"
+    disabled
+>
+Próxima fase →
+</button>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 4
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-4"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 04
+</div>
+
+<h2>✨ Fecundação</h2>
+
+<p>
+Descubra o que acontece quando os gametas se unem.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<div class="info-icon">🔬</div>
+
+<strong>1. Espermatozoide</strong>
+
+<p>
+Um gameta masculino participa do processo de fecundação.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🟣</div>
+
+<strong>2. Óvulo</strong>
+
+<p>
+O gameta feminino participa da formação da nova célula.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">✨</div>
+
+<strong>3. União</strong>
+
+<p>
+Os gametas se unem durante a fecundação.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🧬</div>
+
+<strong>4. Zigoto</strong>
+
+<p>
+A união dos gametas forma o zigoto.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Qual alternativa descreve corretamente a fecundação?
+</div>
+
+<div class="answers" id="q4">
+
+<button class="answer">
+Produção de novos óvulos.
+</button>
+
+<button
+    class="answer"
+    data-correct="true"
+>
+União do espermatozoide com o óvulo, formando o zigoto.
+</button>
+
+<button class="answer">
+Implantação do embrião no útero.
+</button>
+
+<button class="answer">
+Formação dos órgãos durante a gestação.
+</button>
+
+</div>
+
+<div class="feedback" id="f4"></div>
+
+<div class="next">
+<button
+    class="btn btn-primary"
+    id="next4"
+    disabled
+>
+Próxima fase →
+</button>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 5
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-5"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 05
+</div>
+
+<h2>🧩 Organizando o desenvolvimento</h2>
+
+<p>
+Clique nas etapas na ordem correta.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="big-progress" id="orderProgress">
+
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+
+</div>
+
+<div class="order-list" id="orderList">
+
+<button class="order-btn" data-order="3">
+
+<div class="order-num">?</div>
+
+<strong>Implantação no útero</strong>
+
+<p>
+O embrião se fixa no revestimento interno do útero.
+</p>
+
+</button>
+
+
+<button class="order-btn" data-order="1">
+
+<div class="order-num">?</div>
+
+<strong>Fecundação</strong>
+
+<p>
+O espermatozoide se une ao óvulo.
+</p>
+
+</button>
+
+
+<button class="order-btn" data-order="4">
+
+<div class="order-num">?</div>
+
+<strong>Desenvolvimento embrionário e fetal</strong>
+
+<p>
+O organismo passa por diferentes etapas de desenvolvimento.
+</p>
+
+</button>
+
+
+<button class="order-btn" data-order="2">
+
+<div class="order-num">?</div>
+
+<strong>Divisões celulares iniciais</strong>
+
+<p>
+O zigoto passa por sucessivas divisões celulares.
+</p>
+
+</button>
+
+</div>
+
+<div class="feedback" id="f5"></div>
+
+<div class="next">
+
+<button
+    class="btn btn-primary"
+    id="next5"
+    disabled
+>
+Próxima fase →
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 6
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-6"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 06
+</div>
+
+<h2>🫀 Gestação e placenta</h2>
+
+<p>
+Vamos entender algumas funções importantes durante a gestação.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<div class="info-icon">🫀</div>
+
+<strong>Placenta</strong>
+
+<p>
+Participa das trocas de gases, nutrientes e outras substâncias entre a gestante e o feto.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🌱</div>
+
+<strong>Desenvolvimento</strong>
+
+<p>
+Durante a gestação, o organismo em desenvolvimento passa por várias transformações.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🩸</div>
+
+<strong>Trocas</strong>
+
+<p>
+A placenta participa da passagem de oxigênio e nutrientes e da eliminação de algumas substâncias.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">🛡️</div>
+
+<strong>Proteção</strong>
+
+<p>
+A placenta também exerce funções importantes relacionadas à gestação e à produção hormonal.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Qual é uma função importante da placenta?
+</div>
+
+<div class="answers" id="q6">
+
+<button class="answer">
+Produzir espermatozoides.
+</button>
+
+<button
+    class="answer"
+    data-correct="true"
+>
+Realizar trocas de substâncias entre gestante e feto.
+</button>
+
+<button class="answer">
+Produzir óvulos.
+</button>
+
+<button class="answer">
+Formar os ossos diretamente.
+</button>
+
+</div>
+
+<div class="feedback" id="f6"></div>
+
+<div class="next">
+<button
+    class="btn btn-primary"
+    id="next6"
+    disabled
+>
+Próxima fase →
+</button>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 7
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-7"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 07
+</div>
+
+<h2>🧬 Cromossomos e genética</h2>
+
+<p>
+Uma rápida revisão sobre o material genético humano.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<div class="info-icon">🧬</div>
+
+<strong>DNA</strong>
+
+<p>
+O DNA contém informações genéticas importantes para o funcionamento e desenvolvimento dos organismos.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">📚</div>
+
+<strong>Cromossomos</strong>
+
+<p>
+São estruturas formadas por DNA associado a proteínas.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">46</div>
+
+<strong>Células somáticas</strong>
+
+<p>
+As células humanas somáticas normalmente possuem 46 cromossomos.
+</p>
+
+</div>
+
+<div class="info-box">
+
+<div class="info-icon">23</div>
+
+<strong>Gametas</strong>
+
+<p>
+Os gametas humanos normalmente possuem 23 cromossomos.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="question-title">
+Quantos cromossomos uma célula humana normalmente possui?
+</div>
+
+<div class="answers" id="q7">
+
+<button class="answer">
+23
+</button>
+
+<button
+    class="answer"
+    data-correct="true"
+>
+46
+</button>
+
+<button class="answer">
+92
+</button>
+
+<button class="answer">
+12
+</button>
+
+</div>
+
+<div class="feedback" id="f7"></div>
+
+<div class="next">
+
+<button
+    class="btn btn-primary"
+    id="next7"
+    disabled
+>
+Desafio final →
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FASE 8
+===================================================== -->
+
+<section
+    class="screen"
+    id="screen-8"
+>
+
+<div class="section-header">
+
+<div class="section-tag">
+FASE 08 • FINAL
+</div>
+
+<h2>🏆 Desafio final</h2>
+
+<p>
+Última missão. Responda às perguntas para concluir sua jornada.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div
+    class="quiz-counter"
+    id="finalCounter"
+>
+Pergunta 1 de 5
+</div>
+
+<div
+    class="question-title"
+    id="finalQuestion"
+>
+</div>
+
+<div
+    class="answers"
+    id="finalAnswers"
+>
+</div>
+
+<div
+    class="feedback"
+    id="finalFeedback"
+>
+</div>
+
+<div class="next">
+
+<button
+    class="btn btn-primary"
+    id="finalNext"
+    disabled
+>
+Próxima →
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     FINAL
+===================================================== -->
+
+<section
+    class="screen final"
+    id="screen-final"
+>
+
+<div class="final-box">
+
+<div class="trophy">
+🏆
+</div>
+
+<h2>
+Jornada concluída!
+</h2>
+
+<p>
+Você completou todas as fases da Jornada da Reprodução Humana.
+</p>
+
+<div class="final-score">
+
+⭐ <span id="finalScore">0</span> pontos
+
+</div>
+
+
+<div class="summary">
+
+<h3>
+📚 O que você aprendeu
+</h3>
+
+<ul>
+
+<li>
+Os gametas humanos são o
+<strong>espermatozoide</strong> e o
+<strong>óvulo</strong>.
+</li>
+
+<li>
+Os ovários produzem os gametas femininos e os testículos produzem os gametas masculinos.
+</li>
+
+<li>
+A fecundação é a união dos gametas e forma o
+<strong>zigoto</strong>.
+</li>
+
+<li>
+Após a fecundação ocorrem divisões celulares, implantação e desenvolvimento.
+</li>
+
+<li>
+A placenta participa das trocas de substâncias entre gestante e feto.
+</li>
+
+<li>
+As células humanas somáticas normalmente possuem
+<strong>46 cromossomos</strong>, enquanto os gametas possuem 23.
+</li>
+
+</ul>
+
+</div>
+
+
+<div class="home-buttons">
+
+<button
+    class="btn btn-primary"
+    id="restart"
+>
+🔄 Jogar novamente
+</button>
+
+<button
+    class="btn btn-secondary"
+    id="returnHome"
+>
+🏠 Menu principal
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+</div>
+</main>
+
+</div>
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+/* ============================================================
+   JORNADA DA REPRODUÇÃO HUMANA
+   VERSÃO EXPANDIDA
+============================================================ */
+
+
+/* ============================================================
+   ESTADO
+============================================================ */
+
+const game = {
+
+    score:0,
+
+    lives:3,
+
+    currentPhase:0,
+
+    unlockedPhase:1,
+
+    phaseCompleted:{},
+
+    orderStep:1,
+
+    finalIndex:0,
+
+    finalAnswered:false
+
+};
+
+
+/* ============================================================
+   ELEMENTOS
+============================================================ */
+
+const topScore =
+    document.getElementById("topScore");
+
+const sideScore =
+    document.getElementById("sideScore");
+
+const livesElement =
+    document.getElementById("lives");
+
+const sideProgress =
+    document.getElementById("sideProgress");
+
+const toast =
+    document.getElementById("toast");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+
+/* ============================================================
+   SCORE
+============================================================ */
+
+function addScore(points){
+
+    game.score += points;
+
+    updateUI();
+
+}
+
+
+/* ============================================================
+   UI
+============================================================ */
+
+function updateUI(){
+
+    topScore.textContent =
+        game.score;
+
+    sideScore.textContent =
+        game.score;
+
+    livesElement.textContent =
+        game.lives;
+
+    const progress =
+        ((game.unlockedPhase - 1) / 8) * 100;
+
+    sideProgress.style.width =
+        Math.min(progress,100) + "%";
+
+    updateSidebar();
+
+}
+
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+let toastTimer;
+
+function showToast(message,type=""){
+
+    clearTimeout(toastTimer);
+
+    toast.textContent =
+        message;
+
+    toast.className =
+        "toast show " + type;
+
+    toastTimer =
+        setTimeout(() => {
+
+            toast.className =
+                "toast";
+
+        },2500);
+
+}
+
+
+/* ============================================================
+   TELA
+============================================================ */
+
+function showScreen(id){
+
+    document
+        .querySelectorAll(".screen")
+        .forEach(screen => {
+
+            screen.classList.remove("active");
+
+        });
+
+    const screen =
+        document.getElementById(id);
+
+    if(screen){
+
+        screen.classList.add("active");
+
+    }
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+    sidebar.classList.remove("open");
+
+}
+
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+
+function updateSidebar(){
+
+    document
+        .querySelectorAll(".phase-item")
+        .forEach(item => {
+
+            const phase =
+                Number(item.dataset.phase);
+
+            item.classList.remove(
+                "active",
+                "completed",
+                "locked"
+            );
+
+            if(
+                game.phaseCompleted[phase]
+            ){
+
+                item.classList.add(
+                    "completed"
+                );
+
+                item.querySelector(
+                    ".phase-check"
+                ).textContent = "✓";
+
+            }
+
+            else{
+
+                item.querySelector(
+                    ".phase-check"
+                ).textContent =
+                    phase;
+
+            }
+
+            if(
+                phase === game.currentPhase
+            ){
+
+                item.classList.add(
+                    "active"
+                );
+
+            }
+
+            if(
+                phase > game.unlockedPhase
+            ){
+
+                item.classList.add(
+                    "locked"
+                );
+
+            }
+
+        });
+
+}
+
+
+/* ============================================================
+   IR PARA FASE
+============================================================ */
+
+function goToPhase(phase){
+
+    if(
+        phase > game.unlockedPhase
+    ){
+
+        showToast(
+            "🔒 Complete a fase anterior primeiro!",
+            "bad"
+        );
+
+        return;
+
+    }
+
+    game.currentPhase =
+        phase;
+
+    showScreen(
+        "screen-" + phase
+    );
+
+    updateSidebar();
+
+}
+
+
+/* ============================================================
+   DESBLOQUEAR
+============================================================ */
+
+function completePhase(phase){
+
+    if(
+        !game.phaseCompleted[phase]
+    ){
+
+        game.phaseCompleted[phase] =
+            true;
+
+        if(
+            phase === game.unlockedPhase
+        ){
+
+            game.unlockedPhase =
+                Math.min(
+                    8,
+                    game.unlockedPhase + 1
+                );
+
+        }
+
+    }
+
+    updateUI();
+
+}
+
+
+/* ============================================================
+   SIDEBAR CLIQUE
+============================================================ */
+
+document
+    .querySelectorAll(".phase-item")
+    .forEach(item => {
+
+        item.addEventListener(
+            "click",
+            () => {
+
+                goToPhase(
+                    Number(
+                        item.dataset.phase
+                    )
+                );
+
+            }
+        );
+
+    });
+
+
+/* ============================================================
+   MOBILE MENU
+============================================================ */
+
+document
+    .getElementById("mobileMenu")
+    .addEventListener(
+        "click",
+        () => {
+
+            sidebar.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   HOME
+============================================================ */
+
+document
+    .getElementById("startGame")
+    .addEventListener(
+        "click",
+        () => {
+
+            game.currentPhase = 1;
+
+            showScreen(
+                "screen-1"
+            );
+
+            updateSidebar();
+
+        }
+    );
+
+
+document
+    .getElementById("howTo")
+    .addEventListener(
+        "click",
+        () => {
+
+            showScreen(
+                "screen-map"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   MAP
+============================================================ */
+
+document
+    .querySelectorAll(".map-node")
+    .forEach(node => {
+
+        node.addEventListener(
+            "click",
+            () => {
+
+                const phase =
+                    Number(
+                        node.dataset.map
+                    );
+
+                goToPhase(phase);
+
+            }
+        );
+
+    });
+
+
+/* ============================================================
+   FUNÇÃO DE PERGUNTA
+============================================================ */
+
+function setupQuestion(
+    containerId,
+    feedbackId,
+    nextId,
+    phase,
+    goodMessage,
+    badMessage
+){
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+    const feedback =
+        document.getElementById(
+            feedbackId
+        );
+
+    const next =
+        document.getElementById(
+            nextId
+        );
+
+    let answered = false;
+
+
+    container
+        .querySelectorAll(".answer")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    if(answered){
+                        return;
+                    }
+
+
+                    const correct =
+                        button.dataset.correct ===
+                        "true";
+
+
+                    if(correct){
+
+                        answered = true;
+
+                        button.classList.add(
+                            "correct"
+                        );
+
+                        container
+                            .querySelectorAll(
+                                ".answer"
+                            )
+                            .forEach(btn => {
+
+                                btn.disabled =
+                                    true;
+
+                            });
+
+
+                        feedback.textContent =
+                            "✅ " + goodMessage;
+
+                        feedback.className =
+                            "feedback show good";
+
+
+                        addScore(100);
+
+
+                        completePhase(
+                            phase
+                        );
+
+
+                        next.disabled =
+                            false;
+
+
+                        showToast(
+                            "🎉 +100 pontos!",
+                            "good"
+                        );
+
+                    }
+
+                    else{
+
+                        button.classList.add(
+                            "wrong"
+                        );
+
+                        button.disabled =
+                            true;
+
+                        feedback.textContent =
+                            "❌ " + badMessage;
+
+                        feedback.className =
+                            "feedback show bad";
+
+
+                        game.lives =
+                            Math.max(
+                                0,
+                                game.lives - 1
+                            );
+
+
+                        updateUI();
+
+
+                        if(
+                            game.lives === 0
+                        ){
+
+                            showToast(
+                                "💡 Você ficou sem vidas, mas pode continuar estudando!",
+                                "bad"
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+        });
+
+}
+
+
+/* ============================================================
+   FASE 1
+============================================================ */
+
+const organData = {
+
+    ovary:{
+        title:"🟣 Ovários",
+        text:
+        "Os ovários são órgãos do sistema reprodutor feminino. " +
+        "Eles produzem os gametas femininos, os óvulos, e também " +
+        "produzem hormônios importantes."
+    },
+
+    tube:{
+        title:"🟡 Tubas uterinas",
+        text:
+        "As tubas uterinas conectam a região dos ovários ao útero. " +
+        "Em geral, a fecundação ocorre em uma das tubas uterinas."
+    },
+
+    uterus:{
+        title:"🩷 Útero",
+        text:
+        "O útero é um órgão muscular onde normalmente ocorre a implantação. " +
+        "Durante a gestação, ele abriga o desenvolvimento do embrião e do feto."
+    },
+
+    vagina:{
+        title:"🔵 Vagina",
+        text:
+        "A vagina é um canal muscular que conecta o colo do útero à parte externa do corpo."
+    }
+
+};
+
+
+document
+    .querySelectorAll(".svg-click")
+    .forEach(element => {
+
+        element.addEventListener(
+            "click",
+            () => {
+
+                const type =
+                    element.dataset.organ;
+
+                const data =
+                    organData[type];
+
+                if(!data){
+                    return;
+                }
+
+
+                document
+                    .querySelectorAll(
+                        ".svg-click"
+                    )
+                    .forEach(el => {
+
+                        el.classList.remove(
+                            "selected"
+                        );
+
+                    });
+
+
+                document
+                    .querySelectorAll(
+                        `[data-organ="${type}"]`
+                    )
+                    .forEach(el => {
+
+                        el.classList.add(
+                            "selected"
+                        );
+
+                    });
+
+
+                document
+                    .getElementById(
+                        "organInfo"
+                    )
+                    .innerHTML = `
+
+                    <div class="info-box">
+
+                        <div class="info-icon">
+                            ${data.title.slice(0,2)}
+                        </div>
+
+                        <strong>
+                            ${data.title}
+                        </strong>
+
+                        <p>
+                            ${data.text}
+                        </p>
+
+                    </div>
+
+                    `;
+
+            }
+        );
+
+    });
+
+
+setupQuestion(
+    "q1",
+    "f1",
+    "next1",
+    1,
+    "Os ovários normalmente produzem os óvulos.",
+    "Pense na estrutura responsável pela produção dos gametas femininos."
+);
+
+
+/* ============================================================
+   FASE 1 → 2
+============================================================ */
+
+document
+    .getElementById("next1")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(2);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 2
+============================================================ */
+
+setupQuestion(
+    "q2",
+    "f2",
+    "next2",
+    2,
+    "Correto! Os testículos produzem os espermatozoides.",
+    "Os ovários pertencem ao sistema reprodutor feminino e o útero não produz espermatozoides."
+);
+
+
+document
+    .getElementById("next2")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(3);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 3
+============================================================ */
+
+setupQuestion(
+    "q3",
+    "f3",
+    "next3",
+    3,
+    "Correto! O óvulo é o gameta feminino.",
+    "O zigoto e o embrião não são gametas."
+);
+
+
+document
+    .getElementById("next3")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(4);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 4
+============================================================ */
+
+setupQuestion(
+    "q4",
+    "f4",
+    "next4",
+    4,
+    "Correto! A união dos gametas forma o zigoto.",
+    "Implantação e formação dos órgãos são processos posteriores."
+);
+
+
+document
+    .getElementById("next4")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(5);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 5 — ORDEM
+============================================================ */
+
+const orderButtons =
+    document.querySelectorAll(
+        ".order-btn"
+    );
+
+let orderStep = 1;
+
+orderButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            if(
+                button.disabled
+            ){
+                return;
+            }
+
+
+            const expected =
+                Number(
+                    button.dataset.order
+                );
+
+
+            if(
+                expected === orderStep
+            ){
+
+                button.disabled =
+                    true;
+
+                button.classList.add(
+                    "done"
+                );
+
+                button.querySelector(
+                    ".order-num"
+                ).textContent =
+                    orderStep;
+
+
+                document
+                    .querySelector(
+                        "#orderProgress span:nth-child(" +
+                        orderStep +
+                        ")"
+                    )
+                    .classList.add(
+                        "active"
+                    );
+
+
+                orderStep++;
+
+
+                if(
+                    orderStep === 5
+                ){
+
+                    addScore(200);
+
+                    completePhase(5);
+
+                    document
+                        .getElementById(
+                            "f5"
+                        )
+                        .textContent =
+                        "🎉 Excelente! Você organizou todas as etapas corretamente. +200 pontos!";
+
+                    document
+                        .getElementById(
+                            "f5"
+                        )
+                        .className =
+                        "feedback show good";
+
+
+                    document
+                        .getElementById(
+                            "next5"
+                        )
+                        .disabled =
+                        false;
+
+
+                    showToast(
+                        "🏆 +200 pontos!",
+                        "good"
+                    );
+
+                }
+
+                else{
+
+                    document
+                        .getElementById(
+                            "f5"
+                        )
+                        .textContent =
+                        "✅ Etapa correta! Continue.";
+
+                    document
+                        .getElementById(
+                            "f5"
+                        )
+                        .className =
+                        "feedback show good";
+
+                }
+
+            }
+
+            else{
+
+                document
+                    .getElementById(
+                        "f5"
+                    )
+                    .textContent =
+                    "❌ Essa não é a próxima etapa. Pense no que acontece primeiro.";
+
+                document
+                    .getElementById(
+                        "f5"
+                    )
+                    .className =
+                    "feedback show bad";
+
+
+                game.lives =
+                    Math.max(
+                        0,
+                        game.lives - 1
+                    );
+
+                updateUI();
+
+            }
+
+        }
+    );
+
+});
+
+
+document
+    .getElementById("next5")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(6);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 6
+============================================================ */
+
+setupQuestion(
+    "q6",
+    "f6",
+    "next6",
+    6,
+    "Correto! A placenta participa das trocas de substâncias entre gestante e feto.",
+    "Pense em uma estrutura responsável por importantes trocas durante a gestação."
+);
+
+
+document
+    .getElementById("next6")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(7);
+
+        }
+    );
+
+
+/* ============================================================
+   FASE 7
+============================================================ */
+
+setupQuestion(
+    "q7",
+    "f7",
+    "next7",
+    7,
+    "Correto! As células humanas somáticas normalmente possuem 46 cromossomos.",
+    "23 cromossomos é o número normalmente encontrado nos gametas."
+);
+
+
+document
+    .getElementById("next7")
+    .addEventListener(
+        "click",
+        () => {
+
+            goToPhase(8);
+
+            loadFinalQuestion();
+
+        }
+    );
+
+
+/* ============================================================
+   DESAFIO FINAL
+============================================================ */
+
+const finalQuestions = [
+
+    {
+        q:"Qual célula reprodutiva é produzida pelos testículos?",
+
+        a:[
+            "Óvulo",
+            "Espermatozoide",
+            "Zigoto",
+            "Embrião"
+        ],
+
+        c:1,
+
+        explanation:
+        "Os testículos produzem os espermatozoides."
+    },
+
+    {
+        q:"Onde o embrião normalmente se implanta?",
+
+        a:[
+            "Ovário",
+            "Tuba uterina",
+            "Útero",
+            "Testículo"
+        ],
+
+        c:2,
+
+        explanation:
+        "A implantação ocorre normalmente no revestimento interno do útero."
+    },
+
+    {
+        q:"Quantos cromossomos um gameta humano normalmente possui?",
+
+        a:[
+            "46",
+            "92",
+            "23",
+            "12"
+        ],
+
+        c:2,
+
+        explanation:
+        "Os gametas humanos normalmente possuem 23 cromossomos."
+    },
+
+    {
+        q:"Qual processo forma o zigoto?",
+
+        a:[
+            "Implantação",
+            "Fecundação",
+            "Gestação",
+            "Divisão dos órgãos"
+        ],
+
+        c:1,
+
+        explanation:
+        "A fecundação é a união dos gametas que forma o zigoto."
+    },
+
+    {
+        q:"Qual é uma função importante da placenta?",
+
+        a:[
+            "Produzir espermatozoides",
+            "Produzir óvulos",
+            "Participar das trocas de substâncias entre gestante e feto",
+            "Formar os ossos diretamente"
+        ],
+
+        c:2,
+
+        explanation:
+        "A placenta participa de trocas importantes durante a gestação."
+    }
+
+];
+
+
+function loadFinalQuestion(){
+
+    const data =
+        finalQuestions[
+            game.finalIndex
+        ];
+
+
+    document
+        .getElementById(
+            "finalCounter"
+        )
+        .textContent =
+        `Pergunta ${game.finalIndex + 1} de ${finalQuestions.length}`;
+
+
+    document
+        .getElementById(
+            "finalQuestion"
+        )
+        .textContent =
+        data.q;
+
+
+    const container =
+        document.getElementById(
+            "finalAnswers"
+        );
+
+    container.innerHTML =
+        "";
+
+
+    document
+        .getElementById(
+            "finalFeedback"
+        )
+        .className =
+        "feedback";
+
+
+    document
+        .getElementById(
+            "finalNext"
+        )
+        .disabled =
+        true;
+
+
+    game.finalAnswered =
+        false;
+
+
+    data.a.forEach(
+        (answer,index) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.className =
+                "answer";
+
+            button.textContent =
+                answer;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    answerFinal(
+                        index,
+                        button
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                button
+            );
+
+        }
+    );
+
+}
+
+
+function answerFinal(
+    index,
+    button
+){
+
+    if(game.finalAnswered){
+        return;
+    }
+
+
+    const data =
+        finalQuestions[
+            game.finalIndex
+        ];
+
+
+    const feedback =
+        document.getElementById(
+            "finalFeedback"
+        );
+
+
+    if(
+        index === data.c
+    ){
+
+        game.finalAnswered =
+            true;
+
+        button.classList.add(
+            "correct"
+        );
+
+
+        document
+            .querySelectorAll(
+                "#finalAnswers .answer"
+            )
+            .forEach(btn => {
+
+                btn.disabled =
+                    true;
+
+            });
+
+
+        addScore(100);
+
+
+        feedback.textContent =
+            "✅ " + data.explanation;
+
+        feedback.className =
+            "feedback show good";
+
+
+        showToast(
+            "+100 pontos!",
+            "good"
+        );
+
+
+        const next =
+            document.getElementById(
+                "finalNext"
+            );
+
+        next.disabled =
+            false;
+
+
+        if(
+            game.finalIndex ===
+            finalQuestions.length - 1
+        ){
+
+            next.textContent =
+                "🏆 Concluir jornada";
+
+        }
+
+    }
+
+    else{
+
+        button.classList.add(
+            "wrong"
+        );
+
+        button.disabled =
+            true;
+
+
+        feedback.textContent =
+            "❌ Resposta incorreta. Pense nos conceitos estudados.";
+
+        feedback.className =
+            "feedback show bad";
+
+
+        game.lives =
+            Math.max(
+                0,
+                game.lives - 1
+            );
+
+        updateUI();
+
+    }
+
+}
+
+
+/* ============================================================
+   FINAL → PRÓXIMA
+============================================================ */
+
+document
+    .getElementById("finalNext")
+    .addEventListener(
+        "click",
+        () => {
+
+            if(
+                !game.finalAnswered
+            ){
+                return;
+            }
+
+
+            game.finalIndex++;
+
+
+            if(
+                game.finalIndex >=
+                finalQuestions.length
+            ){
+
+                completePhase(8);
+
+                finishGame();
+
+            }
+
+            else{
+
+                loadFinalQuestion();
+
+            }
+
+        }
+    );
+
+
+/* ============================================================
+   FINAL
+============================================================ */
+
+function finishGame(){
+
+    document
+        .getElementById(
+            "finalScore"
+        )
+        .textContent =
+        game.score;
+
+
+    game.currentPhase =
+        8;
+
+
+    showScreen(
+        "screen-final"
+    );
+
+
+    updateUI();
+
+}
+
+
+/* ============================================================
+   REINICIAR
+============================================================ */
+
+document
+    .getElementById("restart")
+    .addEventListener(
+        "click",
+        () => {
+
+            resetGame();
+
+            game.currentPhase =
+                1;
+
+            showScreen(
+                "screen-1"
+            );
+
+            updateSidebar();
+
+        }
+    );
+
+
+/* ============================================================
+   MENU PRINCIPAL
+============================================================ */
+
+document
+    .getElementById("returnHome")
+    .addEventListener(
+        "click",
+        () => {
+
+            resetGame();
+
+            game.currentPhase =
+                0;
+
+            showScreen(
+                "screen-home"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+function resetGame(){
+
+    game.score = 0;
+
+    game.lives = 3;
+
+    game.currentPhase = 0;
+
+    game.unlockedPhase = 1;
+
+    game.phaseCompleted = {};
+
+    game.orderStep = 1;
+
+    game.finalIndex = 0;
+
+    game.finalAnswered = false;
+
+
+    /* reset respostas */
+
+    document
+        .querySelectorAll(
+            ".answer"
+        )
+        .forEach(button => {
+
+            button.disabled =
+                false;
+
+            button.classList.remove(
+                "correct",
+                "wrong"
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(
+            ".feedback"
+        )
+        .forEach(feedback => {
+
+            feedback.className =
+                "feedback";
+
+            feedback.textContent =
+                "";
+
+        });
+
+
+    document
+        .querySelectorAll(
+            ".next"
+        )
+        .forEach(() => {});
+
+
+    [
+        "next1",
+        "next2",
+        "next3",
+        "next4",
+        "next5",
+        "next6",
+        "next7",
+        "finalNext"
+    ].forEach(id => {
+
+        const button =
+            document.getElementById(id);
+
+        if(button){
+            button.disabled =
+                true;
+        }
+
+    });
+
+
+    /* reset ordem */
+
+    orderStep = 1;
+
+    orderButtons.forEach(button => {
+
+        button.disabled =
+            false;
+
+        button.classList.remove(
+            "done"
+        );
+
+        button.querySelector(
+            ".order-num"
+        ).textContent =
+            "?";
+
+    });
+
+
+    document
+        .querySelectorAll(
+            "#orderProgress span"
+        )
+        .forEach(span => {
+
+            span.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    /* reset final */
+
+    document
+        .getElementById(
+            "finalNext"
+        )
+        .textContent =
+        "Próxima →";
+
+
+    updateUI();
+
+}
+
+
+/* ============================================================
+   INÍCIO
+============================================================ */
+
+updateUI();
+
+</script>
+
+</body>
+</html>
